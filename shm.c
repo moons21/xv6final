@@ -75,7 +75,6 @@ int shm_open(int id, char **pointer) {
   *pointer = (char *)va;
   myproc()->sz = va;
 
-
 return 0; //added to remove compiler warning -- you should decide what to return
 }
 
