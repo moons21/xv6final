@@ -68,6 +68,7 @@ int shm_open(int id, char **pointer) {
     mappages(myproc()->pgdir, (char *)va, PGSIZE, 
 	     V2P(shm_table.shm_pages[firstFreeAddress].frame), PTE_W | PTE_U);
     ++(shm_table.shm_pages[firstFreeAddress].refcnt);
+    shm_table.shm_pages[firstFreeAddress].id = id;
     release(&(shm_table.lock));
   }
 
