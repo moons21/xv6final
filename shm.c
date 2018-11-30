@@ -30,9 +30,47 @@ void shminit() {
 
 int shm_open(int id, char **pointer) {
 
-//you write this
+  uint caseNumber = 2;
+  uint i;
+  uint firstFreeAddress = 0;
+  uint va = PGROUNDUP(myproc()->sz);
 
+  // check if id already exists
+  acquire(&(shm_table.lock));
+  for (i = 0; i< 64; i++) {  
+    if (shm_table.shm_pages[i].id == id) {
+      caseNumber = 1; 
+    }
+    if ((shm_table.shm_pages[i].id == 0) && (firstFreeAddress == 0){
+	firstFreeAddress = i;
+      }
+  }
+  release(&(shm_table.lock));
 
+  // id we are opening already exists. map the page 
+  if (caseNumber == 1) {
+    acquire(&(shm_table.lock));
+    mappages(myproc()->pgdir, (char *)va, PGSIZE, 
+	     V2P(shm_table.shm_pages[i]->frame), PTE_W | PTE_U);
+    ++(shm_table.shm_pages[i]->refcnt);
+    release(&(shm_table.lock));
+  }
+  
+  // id we want to open does not exist
+  char* mem;
+  else if (caseNumber == 2) {
+    mem = kmalloc();
+    memset(mem, 0, PGSIZE);
+    acquire(&(shm_table.lock));
+    shm_table.shm_pages[firstFreeAdress]->frame;
+    mappages(myproc()->pgdir, (char *)va, PGSIZE, 
+	     V2P(shm_table.shm_pages[firstFreeAddress]->frame), PTE_W | PTE_U);
+    ++(shm_table.shm_pages[firstFreeAddress]->refcnt);
+    release(&(shm_table.lock));
+  }
+
+  *pointer = (char *)va;
+  sz = va;
 
 
 return 0; //added to remove compiler warning -- you should decide what to return
@@ -40,7 +78,6 @@ return 0; //added to remove compiler warning -- you should decide what to return
 
 
 int shm_close(int id) {
-//you write this too!
 
 
 
