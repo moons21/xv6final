@@ -10,7 +10,7 @@
 struct {
   struct spinlock lock;
   struct shm_page {
-    uint id;	// Specy shared memory segment
+    uint id;	// Specify shared memory segment
     char *frame;	// Pointer to physical frame that will be shared
     int refcnt;		// Number of processes sharing the page
   } shm_pages[64];
@@ -48,7 +48,16 @@ int shm_open(int id, char **pointer) {
 	firstFreeAddress = i;
       }
   }
+/*
+  // Search table to see if the id already exists
+  for(i = 0; i < 64; i+=1){
+    if (shm_table.shm_pages[i].id == id){
+      indexPage = i;
+    }
+  }
+*/
   release(&(shm_table.lock));
+  cprintf("meme\n");
 
   // id we are opening already exists. map the page 
   if (caseNumber == 1) {
@@ -80,9 +89,21 @@ return 0; //added to remove compiler warning -- you should decide what to return
 
 
 int shm_close(int id) {
+  uint i;
+  // Search through table to close the proper page
+  for (i = 0; i < 64; i += 1){
+    if (shm_table.shm_pages[i].id == id){ // Close this page
+      acquire(&(shm_table.lock));
+      shm_table.shm_pages[i].refcnt -= 1;
+      if (shm_table.shm_pages[i].refcnt == 0){ // We are last page to close, clear everything
+        shm_table.shm_pages[i].id =0;
+        shm_table.shm_pages[i].frame =0;
+        shm_table.shm_pages[i].refcnt =0;
 
-
-
-
-return 0; //added to remove compiler warning -- you should decide what to return
+      }
+      release(&(shm_table.lock));
+      return 0; 
+    }
+  }
+  return -1;  // if this is reached, we couldnt close the page
 }
