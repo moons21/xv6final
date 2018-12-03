@@ -10,9 +10,9 @@
 struct {
   struct spinlock lock;
   struct shm_page {
-    uint id;
-    char *frame;
-    int refcnt;
+    uint id;	// Specy shared memory segment
+    char *frame;	// Pointer to physical frame that will be shared
+    int refcnt;		// Number of processes sharing the page
   } shm_pages[64];
 } shm_table;
 
